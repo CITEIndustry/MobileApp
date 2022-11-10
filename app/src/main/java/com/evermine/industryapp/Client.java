@@ -21,15 +21,20 @@ public class Client extends org.java_websocket.client.WebSocketClient {
 
     private static Scanner sc = new Scanner(System.in);
 
+    private URI uri;
+
+
+/*
     public static void main(String[] args) {
         int port = 8888;
         String host = "localhost";
         String location = "ws://" + host + ":" + port;
 
     }
-
-    public Client (URI uri, Draft draft) {
-        super (uri, draft);
+ */
+    public Client (String host, String port) throws URISyntaxException {
+        super (new URI("ws://" + host + ":" + port), (Draft) new Draft_6455());
+        this.connect();
     }
     public static void saluda(ArrayList<String> credencials,Client client){
         int random = (int) (Math.random()*(4-1));
@@ -65,8 +70,8 @@ public class Client extends org.java_websocket.client.WebSocketClient {
         } catch (IOException e) { e.printStackTrace(); }
         return result;
     }
-    public static void enviaCredencials(ArrayList<String> saluts, Client client){
-        client.send(saluts.get(0));
+    public void enviaCredencials(String mesage){
+        this.send(mesage);
     }
     @Override
     public void onMessage(String message) {
@@ -87,17 +92,4 @@ public class Client extends org.java_websocket.client.WebSocketClient {
         System.out.println("Error amb la connexió del socket");
     }
 
-    static public Client connecta(String location) {
-        Client client = null;
-
-        try {
-            client = new Client(new URI(location), (Draft) new Draft_6455());
-            client.connect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            System.out.println("Error: " + location + " no és una direcció URI de WebSocket vàlida");
-        }
-
-        return client;
-    }
 }
