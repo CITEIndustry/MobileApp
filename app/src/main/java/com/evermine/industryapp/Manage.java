@@ -2,9 +2,15 @@ package com.evermine.industryapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -16,11 +22,20 @@ public class Manage extends AppCompatActivity {
     private ArrayList<SwitchElm> switchList;
     private ArrayList<Slider> sliderList;
     private ArrayList<Dropdown> dropdownList;
+    static Manage manage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage);
+        manage=this;
+        Button logout = findViewById(R.id.logout);
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
         switchList = (ArrayList<SwitchElm>) getIntent().getSerializableExtra("switch");
         sliderList = (ArrayList<Slider>) getIntent().getSerializableExtra("slider");
         dropdownList = (ArrayList<Dropdown>) getIntent().getSerializableExtra("dropdown");
@@ -43,9 +58,12 @@ public class Manage extends AppCompatActivity {
             TableRow row=new TableRow(this);
             SeekBar sb = new SeekBar(this);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                sb.setPadding(10,10,10,10);
                 sb.setMin(slid.getMin());
                 sb.setMax(slid.getMax());
                 sb.setProgress((int) slid.getDefaultVal());
+                sb.refreshDrawableState();
+                System.out.println("ValorDefecto: "+slid.getDefaultVal()+"min:"+slid.getMin()+"max:"+slid.getMax());
             }
             row.addView(sb);
             row.setLayoutParams(params2);
@@ -54,8 +72,16 @@ public class Manage extends AppCompatActivity {
 
         for(Dropdown sw: dropdownList){
             TableRow row=new TableRow(this);
-            Switch swt = new Switch(this);
-            System.out.println("Dropdown");
+            Spinner spinner = new Spinner(this);
+
+            String val[] = new String[sw.getOption().length];
+            for(int i = 0; i<sw.getOption().length;i++){
+                val[i]=sw.getOption()[i][1];
+            }
+            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, val);
+            spinner.setAdapter(spinnerArrayAdapter);
+            spinner.setSelection(sw.getDefaultVal());
+            row.addView(spinner);
             tabLayout.addView(row);
         }
 
@@ -63,5 +89,10 @@ public class Manage extends AppCompatActivity {
 
 
 
+
     }
+    public static Manage getInstance(){
+        return manage;
+    }
+
 }

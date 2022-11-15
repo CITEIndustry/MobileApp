@@ -9,7 +9,7 @@ public class Slider implements Serializable {
     private int max;
     private float step;
 
-    public Slider(int id, float defaultVal, int min, int max, float step) {
+    public Slider(int id, float defaultVal, int max, int min, float step) {
         this.id = id;
         this.defaultVal = defaultVal;
         this.min = min;
