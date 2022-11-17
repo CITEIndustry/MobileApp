@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<SwitchElm> switchList;
     private ArrayList<Slider> sliderList;
     private ArrayList<Dropdown> dropdownList;
+    private ArrayList<Sensor> sensorList;
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable runnable;
     private boolean logged = false;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
         sliderList = new ArrayList<Slider>();
         //sliderList.add(new Slider(1,4.5f,0,100,100));
         dropdownList = new ArrayList<Dropdown>();
+        sensorList = new ArrayList<Sensor>();
+        sensorList.add(new Sensor(1,"Cº",5,10));
         send= findViewById(R.id.sendButton);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,10 +124,11 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(message.equals("Send")){
             Intent intent = new Intent(MainActivity.this, Manage.class);
-            System.out.println("Intent open");
+            //sensorList.add(new Sensor(1,"Cº",5,10));
             intent.putExtra("switch", switchList);
             intent.putExtra("slider", sliderList);
             intent.putExtra("dropdown", dropdownList);
+            intent.putExtra("sensor", sensorList);
             startActivity(intent);
             dropdownList.clear();
             sliderList.clear();
@@ -158,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void  sendUser(User user){
+    private void sendUser(User user){
         try{
             client.send("User::"+user.getName()+"::"+user.getPassword());
         }catch(WebsocketNotConnectedException e){
