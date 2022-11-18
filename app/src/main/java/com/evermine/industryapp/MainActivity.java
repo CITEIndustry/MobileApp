@@ -2,6 +2,7 @@ package com.evermine.industryapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable runnable;
     private boolean logged = false;
+    private static WeakReference<Activity> mainActivityRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         //sliderList.add(new Slider(1,4.5f,0,100,100));
         dropdownList = new ArrayList<Dropdown>();
         sensorList = new ArrayList<Sensor>();
-        sensorList.add(new Sensor(1,"Cº",5,10));
         send= findViewById(R.id.sendButton);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
+                    //Manage ma = (Manage) mainActivityRef.get();
+                    //ma.test();
+                    Manage.getInstance().test();
                     Manage.getInstance().finish();
                     showDialog("Error: The connection with the server has been lost");
                     System.out.println("Disconnected from: " + getURI());
@@ -133,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
             dropdownList.clear();
             sliderList.clear();
             switchList.clear();
+            sensorList.clear();
         }
         else if(logged){
             for(String value:data){
@@ -146,7 +152,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if(values[0].equals("dropdown")){
                     addDropdown(values);
-                    System.out.println("add dropdown");
+                }
+                else if(values[0].equals("sensor")){
+                    System.out.println("sensorrrrr");
+                    addSensor(values);
                 }
 
             }
@@ -190,6 +199,9 @@ public class MainActivity extends AppCompatActivity {
     }
     public void addSlider(String[] values){
         sliderList.add(new Slider(Integer.parseInt(values[1]),Float.parseFloat(values[2]),Integer.parseInt(values[3]),Integer.parseInt(values[4]),Float.parseFloat(values[5])));
+    }
+    public void addSensor(String[] values){
+        sensorList.add(new Sensor(Integer.parseInt(values[1]),values[2],Integer.parseInt(values[3]),Integer.parseInt(values[4])));
     }
     public void addDropdown(String[] values){
         for (String str:values){

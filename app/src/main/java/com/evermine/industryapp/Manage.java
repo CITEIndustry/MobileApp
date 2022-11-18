@@ -19,10 +19,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Manage extends AppCompatActivity {
 
-    private ArrayList<SwitchElm> switchList;
+    private Map<Integer,Switch> switchList;
+
+    //private ArrayList<SwitchElm> switchList;
     private ArrayList<Slider> sliderList;
     private ArrayList<Dropdown> dropdownList;
     private ArrayList<Sensor> sensorList;
@@ -98,13 +101,16 @@ public class Manage extends AppCompatActivity {
             tv.setTypeface(null, Typeface.BOLD);
             tv.setBackgroundColor(Color.parseColor("#ecf0f1"));
             if(val<s.getThresholdlow()){
-                tv.setTextColor(Color.parseColor("#e74c3c"));
+                //tv.setTextColor(Color.parseColor("#e74c3c"));
+                tv.setBackgroundColor(Color.parseColor("#e74c3c"));
             }
             else if(val>s.getThresholdhight()){
-                tv.setTextColor(Color.parseColor("#3498db"));
+                //tv.setTextColor(Color.parseColor("#3498db"));
+                tv.setBackgroundColor(Color.parseColor("#3498db"));
             }
             else {
-                tv.setTextColor(Color.parseColor("#2ecc71"));
+                //tv.setTextColor(Color.parseColor("#2ecc71"));
+                tv.setBackgroundColor(Color.parseColor("#2ecc71"));
             }
             row.addView(tv);
             tabLayout.addView(row);
@@ -116,6 +122,11 @@ public class Manage extends AppCompatActivity {
 
 
     }
+
+    public void test(){
+        System.out.println("dsadhashdohsaudusahduosagudhsaugdiusagdugsaiudguisagduisagduigAUO");
+    }
+
     public static Manage getInstance(){
         return manage;
     }
