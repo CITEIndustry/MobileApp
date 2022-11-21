@@ -2,6 +2,7 @@ package com.evermine.industryapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,10 +23,13 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,27 +38,32 @@ public class MainActivity extends AppCompatActivity {
     private EditText passwordInput;
     private Button send;
     private WebSocketClient client;
-    private ArrayList<SwitchElm> switchList;
-    private ArrayList<Slider> sliderList;
-    private ArrayList<Dropdown> dropdownList;
+    private Map<Integer, SwitchElm> switchList;
+    private Map<Integer, Slider> sliderList;
+    private Map<Integer, Dropdown> dropdownList;
+    private Map<Integer, Sensor> sensorList;
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable runnable;
     private boolean logged = false;
+    private static WeakReference<Activity> mainActivityRef;
+    static MainActivity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mActivity=this;
         //10.0.2.2
         serverInput = findViewById(R.id.serverInput);
         userInput = findViewById(R.id.userInput);
         passwordInput = findViewById(R.id.passwordInput);
         connecta(String.valueOf(serverInput.getText()),"8888");
-        switchList = new ArrayList<SwitchElm>();
+        switchList = new HashMap<Integer, SwitchElm>();
         //switchList.add(new SwitchElm(1,"on"));
-        sliderList = new ArrayList<Slider>();
+        sliderList = new HashMap<Integer,Slider>();
         //sliderList.add(new Slider(1,4.5f,0,100,100));
-        dropdownList = new ArrayList<Dropdown>();
+        dropdownList = new HashMap<Integer,Dropdown>();
+        sensorList = new HashMap<Integer,Sensor>();
         send= findViewById(R.id.sendButton);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
+                    //Manage ma = (Manage) mainActivityRef.get();
+                    //ma.test();
                     Manage.getInstance().finish();
                     showDialog("Error: The connection with the server has been lost");
                     System.out.println("Disconnected from: " + getURI());
@@ -121,14 +132,26 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(message.equals("Send")){
             Intent intent = new Intent(MainActivity.this, Manage.class);
-            System.out.println("Intent open");
-            intent.putExtra("switch", switchList);
-            intent.putExtra("slider", sliderList);
-            intent.putExtra("dropdown", dropdownList);
+            //sensorList.add(new Sensor(1,"Cº",5,10));
+            intent.putExtra("switch", (Serializable) switchList);
+            intent.putExtra("slider", (Serializable) sliderList);
+            intent.putExtra("dropdown", (Serializable) dropdownList);
+            intent.putExtra("sensor", (Serializable) sensorList);
             startActivity(intent);
             dropdownList.clear();
             sliderList.clear();
             switchList.clear();
+            sensorList.clear();
+        }else if(data[0].equals("change")){
+
+            String values[] = data[1].split("::");
+            if(values[0].equals("switch")){
+                Manage.getInstance().updateSwitch(Integer.parseInt(values[1]),values[2]);
+            }else if(values[0].equals("slider")){
+                Manage.getInstance().updateSlider(Integer.parseInt(values[1]),Integer.parseInt(values[2]));
+            }else if(values[0].equals("dropdown")){
+                Manage.getInstance().updateDropdown(Integer.parseInt(values[1]),Integer.parseInt(values[2]));
+            }
         }
         else if(logged){
             for(String value:data){
@@ -142,7 +165,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if(values[0].equals("dropdown")){
                     addDropdown(values);
-                    System.out.println("add dropdown");
+                }
+                else if(values[0].equals("sensor")){
+                    System.out.println("sensorrrrr");
+                    addSensor(values);
                 }
 
             }
@@ -158,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void  sendUser(User user){
+    private void sendUser(User user){
         try{
             client.send("User::"+user.getName()+"::"+user.getPassword());
         }catch(WebsocketNotConnectedException e){
@@ -182,23 +208,45 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
     public void addSwitch(String[] values){
-        switchList.add(new SwitchElm(Integer.parseInt(values[1]),values[2]));
+        System.out.println("sdsd "+values[3]);
+        switchList.put(Integer.parseInt(values[1]),new SwitchElm(Integer.parseInt(values[1]),values[2],values[3]));
     }
     public void addSlider(String[] values){
-        sliderList.add(new Slider(Integer.parseInt(values[1]),Float.parseFloat(values[2]),Integer.parseInt(values[3]),Integer.parseInt(values[4]),Float.parseFloat(values[5])));
+        sliderList.put(Integer.parseInt(values[1]),new Slider(Integer.parseInt(values[1]),Float.parseFloat(values[2]),Integer.parseInt(values[3]),Integer.parseInt(values[4]),Float.parseFloat(values[5]),values[6]));
+    }
+    public void addSensor(String[] values){
+        for(String value:values){
+            System.out.println("aa "+value);
+        }
+        sensorList.put(Integer.parseInt(values[1]),new Sensor(Integer.parseInt(values[1]),values[2],Integer.parseInt(values[3]),Integer.parseInt(values[4]),Integer.parseInt(values[5]),values[6]));
     }
     public void addDropdown(String[] values){
         for (String str:values){
             System.out.println(str);
         }
-        String[] options = values[3].split("/");
-        Dropdown dp = new Dropdown(Integer.parseInt(values[1]),Integer.parseInt(values[2]),options.length);
+        String[] options = values[4].split("/");
+        Dropdown dp = new Dropdown(Integer.parseInt(values[1]),Integer.parseInt(values[2]),options.length,values[3]);
         for(int i = 0 ;i<options.length;i++){
             String value[] = options[i].split(":");
             dp.setOption(i,0,value[0]);
             dp.setOption(i,1,value[1]);
         }
-        dropdownList.add(dp);
+        dropdownList.put(dp.getId(), dp);
+    }
+
+    public void onchange(String component, int id, int value){
+        if(component.equals("switch")){
+            if(value==1){
+                send("change;;switch::"+id+"::on");
+            }else{
+                send("change;;switch::"+id+"::off");
+            }
+        }else if(component.equals("slider")){
+            send("change;;slider::"+id+"::"+value);
+        }
+        else if(component.equals("dropdown")){
+            send("change;;dropdown::"+id+"::"+value);
+        }
     }
     public void showDialog(String message) {
         //handler.removeCallbacks(runnable);
@@ -209,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
                 builder.setMessage(message)
                         .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-
                             }
                         });
                 // Create the AlertDialog object and return it
@@ -218,5 +265,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public static MainActivity getInstance(){
+        return mActivity;
     }
 }
