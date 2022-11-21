@@ -257,9 +257,6 @@ public class MainActivity extends AppCompatActivity {
                 builder.setMessage(message)
                         .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                if(client.is) {
-                                    connecta(String.valueOf(serverInput.getText()), "8888");
-                                }
                             }
                         });
                 // Create the AlertDialog object and return it
