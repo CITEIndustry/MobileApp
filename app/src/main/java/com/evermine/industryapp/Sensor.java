@@ -8,12 +8,24 @@ public class Sensor implements Serializable {
     private String units;
     private int thresholdlow;
     private int thresholdhight;
+    private int value;
+    private String label;
 
-    public Sensor(int id, String units, int thresholdlow, int thresholdhight) {
+    public Sensor(int id, String units, int thresholdlow, int thresholdhight, int value, String label) {
         this.id = id;
         this.units = units;
         this.thresholdlow = thresholdlow;
         this.thresholdhight = thresholdhight;
+        this.value=value;
+        this.label=label;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
     }
 
     public int getId() {
@@ -46,5 +58,13 @@ public class Sensor implements Serializable {
 
     public void setThresholdhight(int thresholdhight) {
         this.thresholdhight = thresholdhight;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }
