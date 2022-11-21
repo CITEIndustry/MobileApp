@@ -8,13 +8,15 @@ public class Slider implements Serializable {
     private int min;
     private int max;
     private float step;
+    private String label;
 
-    public Slider(int id, float defaultVal, int max, int min, float step) {
+    public Slider(int id, float defaultVal, int max, int min, float step, String label) {
         this.id = id;
         this.defaultVal = defaultVal;
         this.min = min;
         this.max = max;
         this.step = step;
+        this.label = label;
     }
 
     public int getId() {
@@ -55,5 +57,13 @@ public class Slider implements Serializable {
 
     public void setStep(float step) {
         this.step = step;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

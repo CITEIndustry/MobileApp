@@ -3,12 +3,22 @@ package com.evermine.industryapp;
 import java.io.Serializable;
 
 public class SwitchElm implements Serializable {
-    public int id;
-    public String defaultVal;
+    private int id;
+    private String defaultVal;
+    private String label;
 
-    public SwitchElm(int id, String defaultVal) {
+    public SwitchElm(int id, String defaultVal, String label) {
         this.id = id;
         this.defaultVal = defaultVal;
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public int getId() {
