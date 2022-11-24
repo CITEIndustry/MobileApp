@@ -32,10 +32,7 @@ import java.util.TreeSet;
 
 public class Manage extends AppCompatActivity {
 
-    private Map<Integer, SwitchElm> switchList;
-    private Map<Integer, Slider> sliderList;
-    private Map<Integer, Dropdown> dropdownList;
-    private Map<Integer, Sensor> sensorList;
+    private Map<String, Block> blocks;
     //Elements
     private Map<Integer, Switch> switchElemen;
     private Map<Integer, SeekBar> sliderElemen;
@@ -55,155 +52,161 @@ public class Manage extends AppCompatActivity {
                 finish();
             }
         });
-        switchList = (HashMap<Integer, SwitchElm>) getIntent().getSerializableExtra("switch");
-        sliderList = (HashMap<Integer, Slider>) getIntent().getSerializableExtra("slider");
-        dropdownList = (HashMap<Integer, Dropdown>) getIntent().getSerializableExtra("dropdown");
-        sensorList = (HashMap<Integer, Sensor>) getIntent().getSerializableExtra("sensor");
+        blocks = (HashMap<String, Block>) getIntent().getSerializableExtra("blocks");
         switchElemen=new HashMap<Integer, Switch>();
         sliderElemen=new HashMap<Integer, SeekBar>();
         dropdownElemen=new HashMap<Integer, Spinner>();
         TableRow.LayoutParams  params1=new TableRow.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT,1.0f);
         TableRow.LayoutParams params2=new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
         TableLayout tabLayout=(TableLayout) findViewById(R.id.tableElements);
-        //Switch
-        Map<Integer, SwitchElm> sortedSwitch = new TreeMap<>(switchList);
-        TextView SwitchLabel = new TextView(this);
-        SwitchLabel.setText("Lights");
-        SwitchLabel.setTypeface(null, Typeface.BOLD);
-        tabLayout.addView(SwitchLabel);
-        for(Integer sw: switchList.keySet()){
-            TableRow row=new TableRow(this);
-            Switch swt = new Switch(this);
-            if(switchList.get(sw).getDefaultVal().equals("on")){
-                swt.setChecked(true);
+        //tabLayout.setBackgroundColor(R.drawable.roundedtable);
+        tabLayout.setBackgroundColor(Color.parseColor("#ecf0f1"));
+        //For-each for every block
+        for (String bl : blocks.keySet()){
+            TableRow titleRow = new TableRow(this);
+            titleRow.setBackgroundColor(Color.parseColor("#bdc3c7"));
+            TextView blockName = new TextView(this);
+            //blockName.setTextColor(Color.parseColor("#bdc3c7"));
+            blockName.setText(blocks.get(bl).getName());
+            titleRow.addView(blockName);
+            tabLayout.addView(titleRow);
+            //Switch
+            Map<Integer, SwitchElm> sortedSwitch = new TreeMap<>(blocks.get(bl).getSwitchList());
+            TextView SwitchLabel = new TextView(this);
+            SwitchLabel.setText("Lights");
+            SwitchLabel.setTypeface(null, Typeface.BOLD);
+            tabLayout.addView(SwitchLabel);
+            for(Integer sw: sortedSwitch.keySet()){
+                TableRow row=new TableRow(this);
+                Switch swt = new Switch(this);
+                if(blocks.get(bl).getSwitchList().get(sw).getDefaultVal().equals("on")){
+                    swt.setChecked(true);
+                }
+                swt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if(swt.isChecked()==true){
+                            MainActivity.getInstance().onchange("switch",sw,1);
+                        }else{
+                            MainActivity.getInstance().onchange("switch",sw,0);
+                        }
+
+                    }
+                });
+                swt.setText(blocks.get(bl).getSwitchList().get(sw).getLabel());
+                switchElemen.put(blocks.get(bl).getSwitchList().get(sw).getId(),swt);
+                row.addView(swt);
+                row.setLayoutParams(params2);
+                tabLayout.addView(row);
             }
-            swt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(swt.isChecked()==true){
-                        MainActivity.getInstance().onchange("switch",sw,1);
-                    }else{
-                        MainActivity.getInstance().onchange("switch",sw,0);
+            //Sliders
+            Map<Integer, Slider> sortedSlider = new TreeMap<>(blocks.get(bl).getSliderList());
+            TextView SlidersLabel = new TextView(this);
+            SlidersLabel.setText("Boilers power");
+            SlidersLabel.setTypeface(null, Typeface.BOLD);
+            tabLayout.addView(SlidersLabel);
+            for(Integer slid: sortedSlider.keySet()){
+                TableRow row=new TableRow(this);
+                TextView textv = new TextView(this);
+                textv.setText(blocks.get(bl).getSliderList().get(slid).getLabel());
+                row.addView(textv);
+                SeekBar sb = new SeekBar(this);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    sb.setPadding(10,10,10,10);
+                    sb.setMin(blocks.get(bl).getSliderList().get(slid).getMin());
+                    sb.setMax(blocks.get(bl).getSliderList().get(slid).getMax());
+                    sb.setProgress((int) blocks.get(bl).getSliderList().get(slid).getDefaultVal());
+                    sb.refreshDrawableState();
+                    //System.out.println("ValorDefecto: "+slid.getDefaultVal()+"min:"+slid.getMin()+"max:"+slid.getMax());
+                }
+                sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                        MainActivity.getInstance().onchange("slider",slid,sb.getProgress());
                     }
 
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+                sliderElemen.put(blocks.get(bl).getSliderList().get(slid).getId(),sb);
+                row.addView(sb);
+                row.setLayoutParams(params2);
+                tabLayout.addView(row);
+            }
+            //Dropdown
+            Map<Integer, Dropdown> sortedDropdown = new TreeMap<>(blocks.get(bl).getDropdownList());
+            TextView DropdownLabel = new TextView(this);
+            DropdownLabel.setText("Mode");
+            DropdownLabel.setTypeface(null, Typeface.BOLD);
+            tabLayout.addView(DropdownLabel);
+            for(Integer sw: sortedDropdown.keySet()){
+                TableRow row=new TableRow(this);
+                TextView textv = new TextView(this);
+                textv.setText(blocks.get(bl).getDropdownList().get(sw).getLabel());
+                row.addView(textv);
+                Spinner spinner = new Spinner(this);
+
+                String val[] = new String[blocks.get(bl).getDropdownList().get(sw).getOption().length];
+                for(int i = 0; i<blocks.get(bl).getDropdownList().get(sw).getOption().length;i++){
+                    val[i]=blocks.get(bl).getDropdownList().get(sw).getOption()[i][1];
                 }
-            });
-            swt.setText(switchList.get(sw).getLabel());
-            switchElemen.put(switchList.get(sw).getId(),swt);
-            row.addView(swt);
-            row.setLayoutParams(params2);
-            tabLayout.addView(row);
+                ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, val);
+                spinner.setAdapter(spinnerArrayAdapter);
+                spinner.setSelection(blocks.get(bl).getDropdownList().get(sw).getDefaultVal());
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        MainActivity.getInstance().onchange("dropdown",sw,spinner.getSelectedItemPosition());
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+                dropdownElemen.put(blocks.get(bl).getDropdownList().get(sw).getId(),spinner);
+                row.addView(spinner);
+                tabLayout.addView(row);
+            }
+            //Sensors
+            Map<Integer, Sensor> sortedSensor = new TreeMap<>(blocks.get(bl).getSensorList());
+            TextView SensorsLabel = new TextView(this);
+            SensorsLabel.setText("Boilers temperature");
+            SensorsLabel.setTypeface(null, Typeface.BOLD);
+            tabLayout.addView(SensorsLabel);
+            for(Integer s : sortedSensor.keySet()){
+                TableRow row=new TableRow(this);
+                TextView textv = new TextView(this);
+                textv.setText(blocks.get(bl).getSensorList().get(s).getLabel());
+                row.addView(textv);
+                TextView tv = new TextView(this);
+                tv.setText(blocks.get(bl).getSensorList().get(s).getValue()+blocks.get(bl).getSensorList().get(s).getUnits());
+                tv.setTypeface(null, Typeface.BOLD);
+                //tv.setBackgroundColor(Color.parseColor("#ecf0f1"));
+
+                if(blocks.get(bl).getSensorList().get(s).getValue()<blocks.get(bl).getSensorList().get(s).getThresholdlow()){
+                    //tv.setTextColor(Color.parseColor("#e74c3c"));
+                    tv.setBackgroundColor(Color.parseColor("#3498db"));
+                }
+                else if(blocks.get(bl).getSensorList().get(s).getValue()>blocks.get(bl).getSensorList().get(s).getThresholdhight()){
+                    //tv.setTextColor(Color.parseColor("#3498db"));
+                    tv.setBackgroundColor(Color.parseColor("#E74C3C"));
+                }
+                else {
+                    //tv.setTextColor(Color.parseColor("#2ecc71"));
+                    tv.setBackgroundColor(Color.parseColor("#2ecc71"));
+                }
+                row.addView(tv);
+                tabLayout.addView(row);
+
+            }
         }
-        //Sliders
-        Map<Integer, Slider> sortedSlider = new TreeMap<>(sliderList);
-        TextView SlidersLabel = new TextView(this);
-        SlidersLabel.setText("Boilers power");
-        SlidersLabel.setTypeface(null, Typeface.BOLD);
-        tabLayout.addView(SlidersLabel);
-        for(Integer slid: sliderList.keySet()){
-            TableRow row=new TableRow(this);
-            TextView textv = new TextView(this);
-            textv.setText(sliderList.get(slid).getLabel());
-            row.addView(textv);
-            SeekBar sb = new SeekBar(this);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                sb.setPadding(10,10,10,10);
-                sb.setMin(sliderList.get(slid).getMin());
-                sb.setMax(sliderList.get(slid).getMax());
-                sb.setProgress((int) sliderList.get(slid).getDefaultVal());
-                sb.refreshDrawableState();
-                //System.out.println("ValorDefecto: "+slid.getDefaultVal()+"min:"+slid.getMin()+"max:"+slid.getMax());
-            }
-            sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    MainActivity.getInstance().onchange("slider",slid,sb.getProgress());
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
-            });
-            sliderElemen.put(sliderList.get(slid).getId(),sb);
-            row.addView(sb);
-            row.setLayoutParams(params2);
-            tabLayout.addView(row);
-        }
-        //Dropdown
-        Map<Integer, Dropdown> sortedDropdown = new TreeMap<>(dropdownList);
-        TextView DropdownLabel = new TextView(this);
-        DropdownLabel.setText("Mode");
-        DropdownLabel.setTypeface(null, Typeface.BOLD);
-        tabLayout.addView(DropdownLabel);
-        for(Integer sw: sortedDropdown.keySet()){
-            TableRow row=new TableRow(this);
-            TextView textv = new TextView(this);
-            textv.setText(dropdownList.get(sw).getLabel());
-            row.addView(textv);
-            Spinner spinner = new Spinner(this);
-
-            String val[] = new String[dropdownList.get(sw).getOption().length];
-            for(int i = 0; i<dropdownList.get(sw).getOption().length;i++){
-                val[i]=dropdownList.get(sw).getOption()[i][1];
-            }
-            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, val);
-            spinner.setAdapter(spinnerArrayAdapter);
-            spinner.setSelection(dropdownList.get(sw).getDefaultVal());
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    MainActivity.getInstance().onchange("dropdown",sw,spinner.getSelectedItemPosition());
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-
-                }
-            });
-            dropdownElemen.put(dropdownList.get(sw).getId(),spinner);
-            row.addView(spinner);
-            tabLayout.addView(row);
-        }
-        //Sensors
-        Map<Integer, Sensor> sortedSensor = new TreeMap<>(sensorList);
-        TextView SensorsLabel = new TextView(this);
-        SensorsLabel.setText("Boilers temperature");
-        SensorsLabel.setTypeface(null, Typeface.BOLD);
-        tabLayout.addView(SensorsLabel);
-        for(Integer s : sortedSensor.keySet()){
-            TableRow row=new TableRow(this);
-            TextView textv = new TextView(this);
-            textv.setText(sensorList.get(s).getLabel());
-            row.addView(textv);
-            TextView tv = new TextView(this);
-            tv.setText(sensorList.get(s).getValue()+sensorList.get(s).getUnits());
-            tv.setTypeface(null, Typeface.BOLD);
-            //tv.setBackgroundColor(Color.parseColor("#ecf0f1"));
-
-            if(sensorList.get(s).getValue()<sensorList.get(s).getThresholdlow()){
-                //tv.setTextColor(Color.parseColor("#e74c3c"));
-                tv.setBackgroundColor(Color.parseColor("#3498db"));
-            }
-            else if(sensorList.get(s).getValue()>sensorList.get(s).getThresholdhight()){
-                //tv.setTextColor(Color.parseColor("#3498db"));
-                tv.setBackgroundColor(Color.parseColor("#E74C3C"));
-            }
-            else {
-                //tv.setTextColor(Color.parseColor("#2ecc71"));
-                tv.setBackgroundColor(Color.parseColor("#2ecc71"));
-            }
-            row.addView(tv);
-            tabLayout.addView(row);
-        }
-
-
-
-
 
 
     }
