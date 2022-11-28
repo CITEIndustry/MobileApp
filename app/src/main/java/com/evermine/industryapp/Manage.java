@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -34,9 +35,6 @@ public class Manage extends AppCompatActivity {
 
     private Map<String, Block> blocks;
     //Elements
-    private Map<Integer, Switch> switchElemen;
-    private Map<Integer, SeekBar> sliderElemen;
-    private Map<Integer, Spinner> dropdownElemen;
 
     static Manage manage;
 
@@ -53,12 +51,12 @@ public class Manage extends AppCompatActivity {
             }
         });
         blocks = (HashMap<String, Block>) getIntent().getSerializableExtra("blocks");
-        switchElemen=new HashMap<Integer, Switch>();
-        sliderElemen=new HashMap<Integer, SeekBar>();
-        dropdownElemen=new HashMap<Integer, Spinner>();
+
         TableRow.LayoutParams  params1=new TableRow.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT,1.0f);
         TableRow.LayoutParams params2=new TableRow.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
-        TableLayout tabLayout=(TableLayout) findViewById(R.id.tableElements);
+        ScrollView sv = (ScrollView) findViewById(R.id.scrollv);
+        TableLayout tabLayout=new TableLayout(this);
+        sv.addView(tabLayout);
         //tabLayout.setBackgroundColor(R.drawable.roundedtable);
         tabLayout.setBackgroundColor(Color.parseColor("#ecf0f1"));
         //For-each for every block
@@ -85,15 +83,17 @@ public class Manage extends AppCompatActivity {
                 swt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if(swt.isChecked()==true){
-                            MainActivity.getInstance().onchange("switch",sw,1);
+                            System.out.println("envio datooooos");
+                            MainActivity.getInstance().onchange("switch",bl,sw,1);
                         }else{
-                            MainActivity.getInstance().onchange("switch",sw,0);
+                            MainActivity.getInstance().onchange("switch",bl,sw,0);
                         }
 
                     }
                 });
                 swt.setText(blocks.get(bl).getSwitchList().get(sw).getLabel());
-                switchElemen.put(blocks.get(bl).getSwitchList().get(sw).getId(),swt);
+                //switchElemen.put(blocks.get(bl).getSwitchList().get(sw).getId(),swt);
+                blocks.get(bl).getSwitchElemen().put(blocks.get(bl).getSwitchList().get(sw).getId(),swt);
                 row.addView(swt);
                 row.setLayoutParams(params2);
                 tabLayout.addView(row);
@@ -121,7 +121,7 @@ public class Manage extends AppCompatActivity {
                 sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                        MainActivity.getInstance().onchange("slider",slid,sb.getProgress());
+                        MainActivity.getInstance().onchange("slider",bl,slid,sb.getProgress());
                     }
 
                     @Override
@@ -134,7 +134,8 @@ public class Manage extends AppCompatActivity {
 
                     }
                 });
-                sliderElemen.put(blocks.get(bl).getSliderList().get(slid).getId(),sb);
+                //sliderElemen.put(blocks.get(bl).getSliderList().get(slid).getId(),sb);
+                blocks.get(bl).getSliderElemen().put(blocks.get(bl).getSliderList().get(slid).getId(),sb);
                 row.addView(sb);
                 row.setLayoutParams(params2);
                 tabLayout.addView(row);
@@ -162,7 +163,7 @@ public class Manage extends AppCompatActivity {
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        MainActivity.getInstance().onchange("dropdown",sw,spinner.getSelectedItemPosition());
+                        MainActivity.getInstance().onchange("dropdown",bl,sw,spinner.getSelectedItemPosition());
                     }
 
                     @Override
@@ -170,7 +171,8 @@ public class Manage extends AppCompatActivity {
 
                     }
                 });
-                dropdownElemen.put(blocks.get(bl).getDropdownList().get(sw).getId(),spinner);
+                //dropdownElemen.put(blocks.get(bl).getDropdownList().get(sw).getId(),spinner);
+                blocks.get(bl).getDropdownElemen().put(blocks.get(bl).getDropdownList().get(sw).getId(),spinner);
                 row.addView(spinner);
                 tabLayout.addView(row);
             }
@@ -211,38 +213,42 @@ public class Manage extends AppCompatActivity {
 
     }
 
-    public void updateSwitch(int id, String val){
+    public void updateSwitch(String blockid,int id, String val){
         if(val.equals("on")){
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    switchElemen.get(id).setChecked(true);
+                    //switchElemen.get(id).setChecked(true);
+                    blocks.get(blockid).getSwitchElemen().get(id).setChecked(true);
                 }
             });
         }else{
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    switchElemen.get(id).setChecked(false);
+                    //switchElemen.get(id).setChecked(false);
+                    blocks.get(blockid).getSwitchElemen().get(id).setChecked(true);
                 }
             });
 
         }
     }
-    public void updateSlider(int id, int value){
+    public void updateSlider(String blockid, int id, int value){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                sliderElemen.get(id).setProgress(value);
+                //sliderElemen.get(id).setProgress(value);
+                blocks.get(blockid).getSliderElemen().get(id).setProgress(value);
             }
         });
 
     }
-    public void updateDropdown(int id, int value){
+    public void updateDropdown(String blockid, int id, int value){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dropdownElemen.get(id).setSelection(value);
+                //dropdownElemen.get(id).setSelection(value);
+                blocks.get(blockid).getDropdownElemen().get(id).setSelection(value);
             }
         });
 

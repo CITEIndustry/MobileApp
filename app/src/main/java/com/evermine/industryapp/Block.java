@@ -1,5 +1,9 @@
 package com.evermine.industryapp;
 
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.Switch;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,12 +14,19 @@ public class Block implements Serializable {
     private Map<Integer, Slider> sliderList;
     private Map<Integer, Dropdown> dropdownList;
     private Map<Integer, Sensor> sensorList;
+    private Map<Integer, Switch> switchElemen;
+    private Map<Integer, SeekBar> sliderElemen;
+    private Map<Integer, Spinner> dropdownElemen;
+
     public Block(String name){
         this.name=name;
         switchList = new HashMap<Integer, SwitchElm>();
         sliderList = new HashMap<Integer,Slider>();
         dropdownList = new HashMap<Integer,Dropdown>();
         sensorList = new HashMap<Integer,Sensor>();
+        switchElemen=new HashMap<Integer, Switch>();
+        sliderElemen=new HashMap<Integer, SeekBar>();
+        dropdownElemen=new HashMap<Integer, Spinner>();
     }
 
     public void addSwitch(String[] values){
@@ -60,5 +71,49 @@ public class Block implements Serializable {
 
     public Map<Integer, Sensor> getSensorList() {
         return sensorList;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSwitchList(Map<Integer, SwitchElm> switchList) {
+        this.switchList = switchList;
+    }
+
+    public void setSliderList(Map<Integer, Slider> sliderList) {
+        this.sliderList = sliderList;
+    }
+
+    public void setDropdownList(Map<Integer, Dropdown> dropdownList) {
+        this.dropdownList = dropdownList;
+    }
+
+    public void setSensorList(Map<Integer, Sensor> sensorList) {
+        this.sensorList = sensorList;
+    }
+
+    public Map<Integer, Switch> getSwitchElemen() {
+        return switchElemen;
+    }
+
+    public void setSwitchElemen(Map<Integer, Switch> switchElemen) {
+        this.switchElemen = switchElemen;
+    }
+
+    public Map<Integer, SeekBar> getSliderElemen() {
+        return sliderElemen;
+    }
+
+    public void setSliderElemen(Map<Integer, SeekBar> sliderElemen) {
+        this.sliderElemen = sliderElemen;
+    }
+
+    public Map<Integer, Spinner> getDropdownElemen() {
+        return dropdownElemen;
+    }
+
+    public void setDropdownElemen(Map<Integer, Spinner> dropdownElemen) {
+        this.dropdownElemen = dropdownElemen;
     }
 }

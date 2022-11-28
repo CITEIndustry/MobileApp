@@ -134,16 +134,20 @@ public class MainActivity extends AppCompatActivity {
 
             String values[] = data[1].split("::");
             if(values[0].equals("switch")){
-                Manage.getInstance().updateSwitch(Integer.parseInt(values[1]),values[2]);
+                System.out.println("snfsbfibou "+ values[1]+ values[1]+values[2]+values[3]);
+                Manage.getInstance().updateSwitch(values[1],Integer.parseInt(values[2]),values[3]);
             }else if(values[0].equals("slider")){
-                Manage.getInstance().updateSlider(Integer.parseInt(values[1]),Integer.parseInt(values[2]));
+                Manage.getInstance().updateSlider(values[1],Integer.parseInt(values[2]),Integer.parseInt(values[3]));
             }else if(values[0].equals("dropdown")){
-                Manage.getInstance().updateDropdown(Integer.parseInt(values[1]),Integer.parseInt(values[2]));
+                Manage.getInstance().updateDropdown(values[1],Integer.parseInt(values[2]),Integer.parseInt(values[3]));
             }
         }
         else if(logged){
             for(String value:data){
                 String values[] = value.split("::");
+                if(values[0].equals("block")){
+                    addBlock(values[1]);
+                }
                 if(values[0].equals("switch")){
                     addSwitch(values);
                 }
@@ -174,12 +178,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendUser(User user){
         Intent intent = new Intent(MainActivity.this, Manage.class);
-        addFakeData();
+        //addFakeData();
         //sensorList.add(new Sensor(1,"Cº",5,10));
-        intent.putExtra("blocks", (Serializable) blocks);
-        startActivity(intent);
-        blocks.clear();
-        /*
+        //intent.putExtra("blocks", (Serializable) blocks);
+        //startActivity(intent);
+        //blocks.clear();
+
         try{
             client.send("User::"+user.getName()+"::"+user.getPassword());
         }catch(WebsocketNotConnectedException e){
@@ -187,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
             showDialog("Error: Unknown error");
         }
-         */
+
         
     }
 
@@ -208,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
         blocks.put(values,new Block(values));
     }
     public void addSwitch(String[] values){
+        System.out.println("swiiitch"+values);
         blocks.get(values[1]).addSwitch(values);
     }
     public void addSlider(String[] values){
@@ -220,18 +225,18 @@ public class MainActivity extends AppCompatActivity {
         blocks.get(values[1]).addDropdown(values);
     }
 
-    public void onchange(String component, int id, int value){
+    public void onchange(String component,String blockID, int id, int value){
         if(component.equals("switch")){
             if(value==1){
-                send("change;;switch::"+id+"::on");
+                send("change;;switch::"+blockID+"::"+id+"::on");
             }else{
-                send("change;;switch::"+id+"::off");
+                send("change;;switch::"+blockID+"::"+id+"::off");
             }
         }else if(component.equals("slider")){
-            send("change;;slider::"+id+"::"+value);
+            send("change;;slider::"+blockID+"::"+id+"::"+value);
         }
         else if(component.equals("dropdown")){
-            send("change;;dropdown::"+id+"::"+value);
+            send("change;;dropdown::"+blockID+"::"+id+"::"+value);
         }
     }
     public void showDialog(String message) {
