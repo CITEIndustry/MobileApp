@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText userInput;
     private EditText passwordInput;
     private Button send;
-    private WebSocketClient client;
+    public static WebSocketClient client;
     private Map<String,Block> blocks;
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable runnable;

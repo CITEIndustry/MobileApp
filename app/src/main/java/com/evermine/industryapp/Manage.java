@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -33,7 +34,7 @@ import java.util.TreeSet;
 
 public class Manage extends AppCompatActivity {
 
-    private Map<String, Block> blocks;
+    private Map<String, Block> blocks = new HashMap<>();
     //Elements
 
     static Manage manage;
@@ -47,7 +48,9 @@ public class Manage extends AppCompatActivity {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                MainActivity.client.close();
+                Intent intent = new Intent(Manage.this, MainActivity.class);
+                startActivity(intent);
             }
         });
         blocks = (HashMap<String, Block>) getIntent().getSerializableExtra("blocks");
@@ -227,7 +230,7 @@ public class Manage extends AppCompatActivity {
                 @Override
                 public void run() {
                     //switchElemen.get(id).setChecked(false);
-                    blocks.get(blockid).getSwitchElemen().get(id).setChecked(true);
+                    blocks.get(blockid).getSwitchElemen().get(id).setChecked(false);
                 }
             });
 
