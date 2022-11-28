@@ -37,11 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText userInput;
     private EditText passwordInput;
     private Button send;
-    private WebSocketClient client;
-    private Map<Integer, SwitchElm> switchList;
-    private Map<Integer, Slider> sliderList;
-    private Map<Integer, Dropdown> dropdownList;
-    private Map<Integer, Sensor> sensorList;
+    public static WebSocketClient client;
+    private Map<String,Block> blocks;
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable runnable;
     private boolean logged = false;
@@ -58,12 +55,9 @@ public class MainActivity extends AppCompatActivity {
         userInput = findViewById(R.id.userInput);
         passwordInput = findViewById(R.id.passwordInput);
         connecta(String.valueOf(serverInput.getText()),"8888");
-        switchList = new HashMap<Integer, SwitchElm>();
+        blocks = new HashMap<String, Block>();
         //switchList.add(new SwitchElm(1,"on"));
-        sliderList = new HashMap<Integer,Slider>();
         //sliderList.add(new Slider(1,4.5f,0,100,100));
-        dropdownList = new HashMap<Integer,Dropdown>();
-        sensorList = new HashMap<Integer,Sensor>();
         send= findViewById(R.id.sendButton);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onMessageListener (String message) {
         String data[] = message.split(";;");
         if (message.equals("message::OK")){
-            System.out.println("Va bien");
             logged=true;
             send("getComponents");
         }
@@ -133,29 +126,26 @@ public class MainActivity extends AppCompatActivity {
         else if(message.equals("Send")){
             Intent intent = new Intent(MainActivity.this, Manage.class);
             //sensorList.add(new Sensor(1,"Cº",5,10));
-            intent.putExtra("switch", (Serializable) switchList);
-            intent.putExtra("slider", (Serializable) sliderList);
-            intent.putExtra("dropdown", (Serializable) dropdownList);
-            intent.putExtra("sensor", (Serializable) sensorList);
+            intent.putExtra("blocks", (Serializable) blocks);
             startActivity(intent);
-            dropdownList.clear();
-            sliderList.clear();
-            switchList.clear();
-            sensorList.clear();
+            blocks.clear();
         }else if(data[0].equals("change")){
 
             String values[] = data[1].split("::");
             if(values[0].equals("switch")){
-                Manage.getInstance().updateSwitch(Integer.parseInt(values[1]),values[2]);
+                Manage.getInstance().updateSwitch(values[1],Integer.parseInt(values[2]),values[3]);
             }else if(values[0].equals("slider")){
-                Manage.getInstance().updateSlider(Integer.parseInt(values[1]),Integer.parseInt(values[2]));
+                Manage.getInstance().updateSlider(values[1],Integer.parseInt(values[2]),Integer.parseInt(values[3]));
             }else if(values[0].equals("dropdown")){
-                Manage.getInstance().updateDropdown(Integer.parseInt(values[1]),Integer.parseInt(values[2]));
+                Manage.getInstance().updateDropdown(values[1],Integer.parseInt(values[2]),Integer.parseInt(values[3]));
             }
         }
         else if(logged){
             for(String value:data){
                 String values[] = value.split("::");
+                if(values[0].equals("block")){
+                    addBlock(values[1]);
+                }
                 if(values[0].equals("switch")){
                     addSwitch(values);
                 }
@@ -185,6 +175,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendUser(User user){
+        Intent intent = new Intent(MainActivity.this, Manage.class);
+        //addFakeData();
+        //sensorList.add(new Sensor(1,"Cº",5,10));
+        //intent.putExtra("blocks", (Serializable) blocks);
+        //startActivity(intent);
+        //blocks.clear();
+
         try{
             client.send("User::"+user.getName()+"::"+user.getPassword());
         }catch(WebsocketNotConnectedException e){
@@ -192,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
             showDialog("Error: Unknown error");
         }
+
         
     }
 
@@ -207,45 +205,36 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) { e.printStackTrace(); }
         return result;
     }
+
+    public void  addBlock(String values){
+        blocks.put(values,new Block(values));
+    }
     public void addSwitch(String[] values){
-        System.out.println("sdsd "+values[3]);
-        switchList.put(Integer.parseInt(values[1]),new SwitchElm(Integer.parseInt(values[1]),values[2],values[3]));
+        System.out.println("swiiitch"+values);
+        blocks.get(values[1]).addSwitch(values);
     }
     public void addSlider(String[] values){
-        sliderList.put(Integer.parseInt(values[1]),new Slider(Integer.parseInt(values[1]),Float.parseFloat(values[2]),Integer.parseInt(values[3]),Integer.parseInt(values[4]),Float.parseFloat(values[5]),values[6]));
+        blocks.get(values[1]).addSlider(values);
     }
     public void addSensor(String[] values){
-        for(String value:values){
-            System.out.println("aa "+value);
-        }
-        sensorList.put(Integer.parseInt(values[1]),new Sensor(Integer.parseInt(values[1]),values[2],Integer.parseInt(values[3]),Integer.parseInt(values[4]),Integer.parseInt(values[5]),values[6]));
+        blocks.get(values[1]).addSensor(values);
     }
     public void addDropdown(String[] values){
-        for (String str:values){
-            System.out.println(str);
-        }
-        String[] options = values[4].split("/");
-        Dropdown dp = new Dropdown(Integer.parseInt(values[1]),Integer.parseInt(values[2]),options.length,values[3]);
-        for(int i = 0 ;i<options.length;i++){
-            String value[] = options[i].split(":");
-            dp.setOption(i,0,value[0]);
-            dp.setOption(i,1,value[1]);
-        }
-        dropdownList.put(dp.getId(), dp);
+        blocks.get(values[1]).addDropdown(values);
     }
 
-    public void onchange(String component, int id, int value){
+    public void onchange(String component,String blockID, int id, int value){
         if(component.equals("switch")){
             if(value==1){
-                send("change;;switch::"+id+"::on");
+                send("change;;switch::"+blockID+"::"+id+"::on");
             }else{
-                send("change;;switch::"+id+"::off");
+                send("change;;switch::"+blockID+"::"+id+"::off");
             }
         }else if(component.equals("slider")){
-            send("change;;slider::"+id+"::"+value);
+            send("change;;slider::"+blockID+"::"+id+"::"+value);
         }
         else if(component.equals("dropdown")){
-            send("change;;dropdown::"+id+"::"+value);
+            send("change;;dropdown::"+blockID+"::"+id+"::"+value);
         }
     }
     public void showDialog(String message) {
@@ -265,6 +254,24 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void addFakeData(){
+        addBlock("Test");
+        //Block1
+        System.out.println(blocks.get("Test"));
+        addSwitch(new String[]{"","Test","1", "on","TestSwitch"});
+        addSwitch(new String[]{"","Test","2", "on","TestSwitch"});
+        addSlider(new String[]{"","Test","1","5","10","0","1","TestSlider"});
+        addDropdown(new String[]{"","Test","1","0","TestLabel","0:Label1/1:Label2"});
+        addSensor(new String[]{"","Test","1","Cº","3","10","6","TestSensor"});
+        //Block2
+        addBlock("Test2");
+        System.out.println(blocks.get("Test2"));
+        addSwitch(new String[]{"","Test2","1", "on","TestSwitch"});
+        addSlider(new String[]{"","Test2","1","5","10","0","1","TestSlider"});
+        addDropdown(new String[]{"","Test2","1","0","TestLabel","0:Label1/1:Label2"});
+        addSensor(new String[]{"","Test2","1","Cº","3","10","6","TestSensor"});
     }
 
     public static MainActivity getInstance(){

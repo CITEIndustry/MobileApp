@@ -6,14 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".Manage">
 
-    <TableLayout
-        android:id="@+id/tableElements"
-        android:layout_width="369dp"
-        android:layout_height="510dp"
+    <ScrollView
+        android:id="@+id/scrollv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.485"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.694">
+
+
+    </ScrollView>
 
     <Button
         android:id="@+id/logout"
