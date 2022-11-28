@@ -86,7 +86,6 @@ public class Manage extends AppCompatActivity {
                 swt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if(swt.isChecked()==true){
-                            System.out.println("envio datooooos");
                             MainActivity.getInstance().onchange("switch",bl,sw,1);
                         }else{
                             MainActivity.getInstance().onchange("switch",bl,sw,0);

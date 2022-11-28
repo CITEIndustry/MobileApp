@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onMessageListener (String message) {
         String data[] = message.split(";;");
         if (message.equals("message::OK")){
-            System.out.println("Va bien");
             logged=true;
             send("getComponents");
         }
@@ -134,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
 
             String values[] = data[1].split("::");
             if(values[0].equals("switch")){
-                System.out.println("snfsbfibou "+ values[1]+ values[1]+values[2]+values[3]);
                 Manage.getInstance().updateSwitch(values[1],Integer.parseInt(values[2]),values[3]);
             }else if(values[0].equals("slider")){
                 Manage.getInstance().updateSlider(values[1],Integer.parseInt(values[2]),Integer.parseInt(values[3]));
